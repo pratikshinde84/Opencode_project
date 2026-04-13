@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text & PDF Summarizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <!-- Header -->
+                    <div class="text-center mb-5">
+                        <h1 class="display-4 fw-bold text-white mb-3">
+                            <i class="fas fa-magic"></i> Summarizer Pro
+                        </h1>
+                        <p class="text-white-50 fs-5">Quickly summarize text or PDF documents using AI</p>
+                    </div>
+
+                    <!-- Main Card -->
+                    <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                        <!-- Tabs Navigation -->
+                        <div class="nav nav-tabs border-0" id="navTab" role="tablist" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <button class="nav-link active w-50 text-white fw-bold py-3" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-content" type="button" role="tab">
+                                <i class="fas fa-file-alt"></i> Text
+                            </button>
+                            <button class="nav-link w-50 text-white fw-bold py-3" id="pdf-tab" data-bs-toggle="tab" data-bs-target="#pdf-content" type="button" role="tab">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content p-5" id="navTabContent">
+                            <!-- Text Tab -->
+                            <div class="tab-pane fade show active" id="text-content" role="tabpanel">
+                                <form id="textForm">
+                                    <div class="mb-4">
+                                        <label for="textInput" class="form-label fw-bold text-dark">
+                                            <i class="fas fa-keyboard"></i> Enter Your Text
+                                        </label>
+                                        <textarea class="form-control form-control-lg" id="textInput" rows="6" placeholder="Paste your text here... (minimum 10 characters)" required></textarea>
+                                        <small class="text-muted d-block mt-2">Character count: <span id="charCount">0</span>/∞</small>
+                                    </div>
+                                    <button type="submit" class="btn btn-lg btn-primary w-100 fw-bold" id="textSubmitBtn">
+                                        <i class="fas fa-wand-magic-sparkles"></i> Summarize Text
+                                    </button>
+                                </form>
+
+                                <!-- Text Result -->
+                                <div id="textResult" class="alert alert-info mt-4 d-none" role="alert">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Summary</h5>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('textSummary')">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+                                    <p id="textSummary" class="mb-0"></p>
+                                </div>
+
+                                <!-- Loading Spinner -->
+                                <div id="textLoading" class="text-center mt-4 d-none">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="text-muted mt-2">Summarizing your text...</p>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div id="textError" class="alert alert-danger mt-4 d-none" role="alert">
+                                    <i class="fas fa-exclamation-circle"></i> <span id="textErrorMsg"></span>
+                                </div>
+                            </div>
+
+                            <!-- PDF Tab -->
+                            <div class="tab-pane fade" id="pdf-content" role="tabpanel">
+                                <form id="pdfForm">
+                                    <div class="mb-4">
+                                        <label for="pdfInput" class="form-label fw-bold text-dark">
+                                            <i class="fas fa-upload"></i> Select PDF File
+                                        </label>
+                                        <div class="input-group input-group-lg">
+                                            <input type="file" class="form-control" id="pdfInput" accept=".pdf" required>
+                                            <label class="input-group-text" for="pdfInput">Browse</label>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">
+                                            <i class="fas fa-info-circle"></i> Selected: <span id="pdfFileName">No file selected</span>
+                                        </small>
+                                    </div>
+
+                                    <!-- PDF Preview -->
+                                    <div id="pdfPreview" class="alert alert-secondary d-none mb-4" role="alert">
+                                        <p class="mb-0"><strong>File Details:</strong></p>
+                                        <p class="mb-0">Name: <span id="previewFileName"></span></p>
+                                        <p class="mb-0">Size: <span id="previewFileSize"></span> KB</p>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-lg btn-primary w-100 fw-bold" id="pdfSubmitBtn">
+                                        <i class="fas fa-wand-magic-sparkles"></i> Summarize PDF
+                                    </button>
+                                </form>
+
+                                <!-- PDF Result -->
+                                <div id="pdfResult" class="alert alert-info mt-4 d-none" role="alert">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Summary</h5>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('pdfSummary')">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+                                    <p id="pdfSummary" class="mb-0"></p>
+                                </div>
+
+                                <!-- Loading Spinner -->
+                                <div id="pdfLoading" class="text-center mt-4 d-none">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="text-muted mt-2">Summarizing your PDF...</p>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div id="pdfError" class="alert alert-danger mt-4 d-none" role="alert">
+                                    <i class="fas fa-exclamation-circle"></i> <span id="pdfErrorMsg"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="text-center mt-5">
+                        <p class="text-white-50">
+                            <i class="fas fa-info-circle"></i> Powered by OpenRouter AI
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
